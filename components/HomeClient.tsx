@@ -1,88 +1,93 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowUpRight, Check, ChevronDown, Heart, Instagram, Menu, ShieldCheck, Sprout, Users, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowDown, ArrowRight, Check, Flame, Heart, Leaf, Menu, ShieldCheck, Trees, Users, X } from "lucide-react";
 
-const campaigns = [
-  { id:"karhutla", tag:"DARURAT · SUMATERA", title:"Bantu warga terdampak karhutla", place:"Riau & Sumatera Selatan", raised:68450000, target:120000000, days:"12 hari lagi", image:"https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=1100&q=85", desc:"Dukung kebutuhan air bersih, masker, makanan siap saji, dan pemulihan keluarga yang terdampak asap." },
-  { id:"banjir", tag:"PEMULIHAN", title:"Kembali pulih setelah banjir", place:"Kalimantan Selatan", raised:42750000, target:90000000, days:"18 hari lagi", image:"https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&w=1000&q=85", desc:"Bantu keluarga membersihkan rumah, mendapatkan perlengkapan harian, dan memulai kembali aktivitas." },
-  { id:"gempa", tag:"BANTUAN KELUARGA", title:"Hangatkan hari penyintas gempa", place:"Sulawesi Barat", raised:31200000, target:75000000, days:"23 hari lagi", image:"https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1000&q=85", desc:"Salurkan selimut, perlengkapan bayi, paket pangan, dan dukungan pemulihan untuk warga." }
-];
-const rupiah = (n:number) => new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(n);
+const money = (n: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
 
-export default function HomeClient(){
-  const [modal,setModal]=useState(false), [selected,setSelected]=useState("karhutla"), [amount,setAmount]=useState(50000);
-  const [name,setName]=useState(""), [notice,setNotice]=useState("");
-  const [mobile,setMobile]=useState(false);
-  const [showQr,setShowQr]=useState(false);
+export default function HomeClient() {
+  const [modal, setModal] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [amount, setAmount] = useState(50000);
+  const [custom, setCustom] = useState("");
+  const [donor, setDonor] = useState("");
+  const [showQr, setShowQr] = useState(false);
+  const [error, setError] = useState("");
 
+  useEffect(() => {
+    const nodes = document.querySelectorAll<HTMLElement>(".reveal");
+    if (!("IntersectionObserver" in window)) {
+      nodes.forEach((node) => node.classList.add("is-visible"));
+      return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.14, rootMargin: "0px 0px -35px 0px" });
+    nodes.forEach((node) => observer.observe(node));
+    return () => observer.disconnect();
+  }, []);
 
-  async function donate(){
-    if(!name.trim()){setNotice("Isi nama lengkap agar donasimu dapat dicatat.");return;}
-    if(amount<10000){setNotice("Minimal donasi Rp10.000.");return;}
-    setNotice("");
-    setShowQr(true);
+  function openDonation() {
+    setModal(true); setShowQr(false); setError("");
+  }
+
+  function continueToQr() {
+    const value = custom ? Number(custom.replace(/\D/g, "")) : amount;
+    if (!donor.trim()) { setError("Masukkan nama agar donasimu bisa dicatat."); return; }
+    if (!Number.isFinite(value) || value < 10000) { setError("Minimal donasi Rp10.000."); return; }
+    setAmount(value); setError(""); setShowQr(true);
   }
 
   return <main>
-    <div className="topline"><span><span className="live-dot"/> GERAKAN BAIK UNTUK INDONESIA</span><span>Transparan · Bersama · Berdampak</span></div>
-    <nav className="nav wrap">
-      <a className="brand" href="#"><span className="brand-mark"><Sprout size={20}/></span><span>nyala<span className="brand-light">bersama</span><small>KEBAIKAN YANG MENULAR</small></span></a>
-      <div className={`nav-links ${mobile?"open":""}`}><a href="#aksi">Program bantuan</a><a href="#cerita">Cerita dampak</a><a href="#cara">Cara kerja</a><a href="#transparansi">Transparansi</a></div>
-      <button className="nav-cta" onClick={()=>{setModal(true);setNotice("");}}><Heart size={16} fill="currentColor"/> Donasi sekarang</button>
-      <button className="mobile-toggle" onClick={()=>setMobile(!mobile)} aria-label="Menu">{mobile?<X/>:<Menu/>}</button>
-    </nav>
+    <div className="announcement"><span className="pulse-dot"/> GERAKAN PEDULI KARHUTLA <span className="announcement-sep">·</span> SUMATERA, INDONESIA</div>
+    <header className="site-header wrap">
+      <a className="logo" href="#home" aria-label="Nyala Bersama beranda"><span className="logo-symbol"><Flame size={24} fill="currentColor"/></span><span className="logo-words">NYALA<span>BERSAMA</span><small>BERBAGI HARI INI, MENJAGA ESOK</small></span></a>
+      <nav className={menuOpen ? "main-nav nav-open" : "main-nav"}>
+        <a href="#misi" onClick={() => setMenuOpen(false)}>Misi kami</a><a href="#dampak" onClick={() => setMenuOpen(false)}>Kenapa penting</a><a href="#cara" onClick={() => setMenuOpen(false)}>Cara berdonasi</a>
+      </nav>
+      <button className="header-donate" onClick={openDonation}>Donasi <ArrowRight size={16}/></button>
+      <button className="menu-toggle" aria-label="Buka menu" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X/> : <Menu/>}</button>
+    </header>
 
-    <section className="hero wrap">
-      <div className="hero-copy">
-        <div className="eyebrow"><span/> SAATNYA KITA SALING MENJAGA</div>
-        <h1>Di tengah bencana,<br/><em>kita bisa jadi</em><br/>harapan.</h1>
-        <p className="hero-desc">Satu uluran tangan bisa berarti air bersih, tempat berlindung, dan awal baru. Mari hadir untuk saudara kita yang sedang berjuang.</p>
-        <div className="hero-actions"><button className="button-primary" onClick={()=>{setModal(true);setNotice("");}}>Salurkan kebaikan <ArrowUpRight size={18}/></button><a className="text-link" href="#aksi">Lihat program <span>↘</span></a></div>
-        <div className="trust-row"><div className="avatar-stack"><i>R</i><i>A</i><i>D</i><i>+</i></div><div><strong>Komunitas yang bergerak</strong><small>Setiap kontribusi punya arti.</small></div><div className="trust-seal"><ShieldCheck size={17}/><span>Donasi terpantau</span></div></div>
+    <section className="hero" id="home">
+      <div className="hero-image" role="img" aria-label="Petugas berjuang memadamkan kebakaran hutan" />
+      <div className="hero-shade"/>
+      <div className="hero-content wrap">
+        <div className="hero-kicker reveal"><span className="kicker-dot"/> SAATNYA BERGERAK BERSAMA</div>
+        <h1 className="reveal delay-1">Hutan terbakar.<br/><em>Harapan jangan</em><br/>ikut padam.</h1>
+        <p className="hero-lead reveal delay-2">Asap dan api mengancam ruang hidup. Mari bantu kebutuhan darurat warga terdampak dan dukung pemulihan lingkungan.</p>
+        <div className="hero-buttons reveal delay-3"><button className="primary-button" onClick={openDonation}><Heart size={17} fill="currentColor"/> Donasi sekarang <ArrowRight size={17}/></button><a href="#misi" className="scroll-link">Kenali gerakannya <ArrowDown size={15}/></a></div>
+        <div className="hero-footnote reveal delay-3"><ShieldCheck size={16}/> QRIS statis · Pembayaran diverifikasi manual</div>
       </div>
-      <div className="hero-visual">
-        <div className="hero-photo"><img src="https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=1200&q=90" alt="Hutan tropis Indonesia" /></div>
-        <div className="photo-caption"><span>01 / 03</span><span>Menjaga bumi, menjaga sesama.</span></div>
-        <div className="floating-note"><span className="note-icon"><Heart size={17} fill="currentColor"/></span><div><strong>Harapan tumbuh</strong><small>Dari kebaikan kecil kita.</small></div></div>
-        <div className="hero-stamp">#GERAK<br/>BERSAMA</div>
-      </div>
+      <div className="hero-index"><span>01</span> / PEDULI HUTAN & SESAMA</div>
     </section>
 
-    <section className="impact-band"><div className="wrap impact-inner"><div><small>BUKAN TENTANG SEBERAPA BESAR</small><strong>Yang penting, kita hadir.</strong></div><div className="impact-item"><Users/><span><b>Gotong royong</b><small>Kebaikan kolektif</small></span></div><div className="impact-item"><ShieldCheck/><span><b>Terbuka</b><small>Status bisa dipantau</small></span></div><div className="impact-item"><Sprout/><span><b>Berkelanjutan</b><small>Fokus pada pemulihan</small></span></div></div></section>
-
-    <section className="section wrap" id="aksi">
-      <div className="section-heading"><div><div className="eyebrow">ULURAN TANGANMU DIBUTUHKAN</div><h2>Ada yang bisa kita bantu hari ini.</h2></div><a className="text-link" href="#cara">Kenali gerakan ini <span>↗</span></a></div>
-      <div className="campaign-grid">{campaigns.map((c,i)=><article className={`campaign-card ${i===0?"featured":""}`} key={c.id}>
-        <div className="campaign-image"><img src={c.image} alt={c.title}/><span className="image-tag">{c.tag}</span><span className="image-number">0{i+1}</span></div>
-        <div className="campaign-content"><div className="place">⌖ &nbsp;{c.place}</div><h3>{c.title}</h3><p>{c.desc}</p>
-          <div className="progress-meta"><strong>{rupiah(c.raised)}</strong><span>terkumpul dari {rupiah(c.target)}</span></div><div className="progress"><i style={{width:`${Math.min(100,c.raised/c.target*100)}%`}}/></div>
-          <div className="card-bottom"><span>{c.days}</span><button onClick={()=>{setSelected(c.id);setModal(true);setNotice("");}}>Bantu sekarang <ArrowUpRight size={16}/></button></div>
-        </div>
-      </article>)}</div>
-      <p className="demo-note">Angka penggalangan pada tampilan awal ini adalah data contoh untuk pratinjau. Hubungkan database dan laporan penyaluran sebelum dipublikasikan.</p>
+    <section className="intro wrap reveal" id="misi">
+      <div className="intro-label"><span>01</span><i/> TENTANG GERAKAN</div>
+      <div className="intro-copy"><h2>Api bisa melahap pepohonan dalam hitungan jam. <em>Kepedulian bisa membantu membangun kembali.</em></h2><p>Nyala Bersama adalah ruang ajakan untuk saling membantu saat karhutla terjadi. Donasi ditujukan untuk mendukung kebutuhan darurat dan pemulihan—dengan penggunaan dana yang perlu dicatat dan dilaporkan secara terbuka oleh pengelola.</p></div>
     </section>
 
-    <section className="story-section" id="cerita"><div className="wrap story-layout"><div className="story-image"><img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1000&q=85" alt="Relawan membantu masyarakat"/><div className="story-label">KEBAIKAN SELALU MENEMUKAN JALAN.</div></div><div className="story-copy"><div className="eyebrow">LEBIH DARI SEKADAR ANGKA</div><h2>Ketika kita bergerak bersama, beban terasa lebih ringan.</h2><p>Bencana mengubah banyak hal dalam sekejap. Tapi kepedulian mengingatkan kita bahwa tidak ada yang harus melewati masa sulit sendirian.</p><p>Nyala Bersama menghubungkan niat baik dengan kebutuhan nyata di lapangan—dengan informasi yang jelas dan proses yang bisa dipantau.</p><a href="#cara" className="text-link">Kenali cara kami bekerja <span>↗</span></a></div></div></section>
+    <section className="feature wrap" id="dampak">
+      <div className="feature-photo reveal"><img src="/karhutla-hero.jpg" alt="Suasana kebakaran hutan dan petugas pemadam"/><span className="photo-chip"><Flame size={14}/> DARURAT KARHUTLA</span></div>
+      <div className="feature-copy reveal delay-1"><div className="section-kicker">02 / MENGAPA KITA PEDULI</div><h2>Yang terdampak bukan hanya hutan.</h2><p>Kebakaran hutan dan lahan membawa asap, mengganggu kesehatan, merusak habitat, dan membuat aktivitas warga terhenti. Bantuan kecil dapat ikut meringankan kebutuhan mereka.</p><div className="benefit-list"><div><span><Users size={19}/></span><p><b>Dukung warga terdampak</b><small>Bantu kebutuhan dasar sesuai kondisi lapangan.</small></p></div><div><span><Trees size={19}/></span><p><b>Jaga ruang hidup</b><small>Dukung upaya pemulihan lingkungan.</small></p></div><div><span><Leaf size={19}/></span><p><b>Rawat harapan jangka panjang</b><small>Bangun kepedulian yang berkelanjutan.</small></p></div></div><button className="text-button" onClick={openDonation}>Ikut membantu <ArrowRight size={16}/></button></div>
+    </section>
 
-    <section className="section wrap steps" id="cara"><div className="eyebrow">MUDAH, AMAN, DAN TERBUKA</div><h2>Kebaikanmu sampai dengan jelas.</h2><div className="steps-grid"><div><b>01</b><Heart/><h3>Pilih kepedulianmu</h3><p>Tentukan program dan nominal donasi yang ingin kamu berikan.</p></div><div><b>02</b><ShieldCheck/><h3>Bayar dengan QRIS</h3><p>Pindai QRIS menggunakan DANA atau aplikasi pembayaran lain yang mendukung QRIS.</p></div><div><b>03</b><Check/><h3>Kirim bukti pembayaran</h3><p>Simpan bukti transaksi dan kirimkan kepada pengelola untuk verifikasi manual.</p></div></div></section>
+    <section className="donation-section" id="cara"><div className="wrap donation-layout">
+      <div className="donation-copy reveal"><div className="section-kicker">03 / SALURKAN BANTUAN</div><h2>Satu langkah kecil.<br/><em>Arti yang besar.</em></h2><p>Pindai QRIS menggunakan aplikasi pembayaran yang mendukung QRIS, termasuk DANA. Masukkan nominal donasi pada aplikasi jika diminta.</p><div className="steps-mini"><div><b>01</b><span>Pindai QRIS</span></div><div><b>02</b><span>Masukkan nominal</span></div><div><b>03</b><span>Simpan bukti bayar</span></div></div></div>
+      <div className="qr-card reveal delay-1"><div className="qr-card-head"><div><span className="qr-overline">PEMBAYARAN QRIS</span><h3>Scan untuk berdonasi</h3></div><span className="qr-static">QRIS STATIS</span></div><div className="qr-frame"><img src="/qris-donasi.jpg" alt="QRIS pembayaran donasi"/></div><p className="qr-hint">Buka DANA atau aplikasi pembayaran pilihanmu, lalu pindai kode QR di atas.</p><button className="qr-button" onClick={openDonation}>Panduan donasi <ArrowRight size={16}/></button><div className="qr-warning"><ShieldCheck size={16}/> Periksa nama merchant sebelum membayar. Pembayaran perlu diverifikasi manual.</div></div>
+    </div></section>
 
-    <section className="closing"><div className="wrap closing-inner"><div><div className="eyebrow">SEKECIL APA PUN, TETAP BERARTI</div><h2>Mari nyalakan harapan,<br/><em>satu aksi hari ini.</em></h2></div><button className="button-light" onClick={()=>{setModal(true);setNotice("");}}>Saya mau membantu <ArrowUpRight size={18}/></button></div></section>
-    <footer className="footer wrap" id="transparansi"><a className="brand" href="#"><span className="brand-mark"><Sprout size={20}/></span><span>nyala<span className="brand-light">bersama</span><small>KEBAIKAN YANG MENULAR</small></span></a><p>Ruang untuk kepedulian, aksi, dan harapan.</p><div><a href="#aksi">Program</a><a href="#cara">Cara kerja</a><a href="mailto:halo@nyalabersama.id">Kontak</a><span>© 2026 Nyala Bersama</span></div></footer>
+    <section className="closing wrap reveal"><div className="closing-mark"><Flame size={28} fill="currentColor"/></div><p>Hutan yang pulih dimulai dari kepedulian yang nyata.</p><h2>Jangan biarkan api<br/><em>memadamkan harapan.</em></h2><button className="primary-button" onClick={openDonation}>Saya ingin membantu <ArrowRight size={17}/></button></section>
 
-    {modal&&<div className="modal-backdrop" onClick={()=>setModal(false)}><div className="donation-modal" onClick={e=>e.stopPropagation()}>
-      <button className="modal-close" onClick={()=>setModal(false)} aria-label="Tutup"><X/></button>
-      <div className="modal-eyebrow">SATU KEBAIKAN, BANYAK HARAPAN</div>
-      {showQr?<div className="success-state"><h2>Scan QRIS untuk berdonasi</h2><p>Masukkan nominal <strong>{rupiah(amount)}</strong> di aplikasi pembayaranmu jika diminta. QR ini terbaca atas nama merchant <strong>FEL STORE</strong> (Kab. Deli Serdang). Lanjutkan hanya jika nama tersebut memang milik pengelola donasi dan kamu mengenalinya.</p><img src="/qris-donasi.jpg" alt="QRIS donasi Nyala Bersama" style={{display:"block",width:"min(100%,320px)",height:"auto",margin:"18px auto",border:"1px solid #e5e1d8",borderRadius:12}}/><p style={{fontSize:13}}>Setelah membayar, simpan bukti transaksi dan kirimkan kepada pengelola untuk pencatatan. QRIS statis tidak mengirim notifikasi transaksi ke website, jadi status donasi tidak bisa berubah otomatis.</p><button className="button-primary full" onClick={()=>{setShowQr(false);setModal(false);}}>Selesai</button></div>:<>
-      <h2>Yuk, jadi bagian dari harapan.</h2><p className="modal-sub">Pilih program dan nominal yang ingin kamu salurkan.</p>
-      <label className="field-label">PROGRAM BANTUAN</label><select value={selected} onChange={e=>setSelected(e.target.value)}>{campaigns.map(c=><option value={c.id} key={c.id}>{c.title}</option>)}</select>
-      <label className="field-label">NOMINAL DONASI</label><div className="amount-options">{[25000,50000,100000,250000].map(n=><button className={amount===n?"chosen":""} onClick={()=>setAmount(n)} key={n}>{rupiah(n)}</button>)}</div>
-      <div className="custom-amount"><span>Rp</span><input type="number" min="10000" step="1000" value={amount} onChange={e=>setAmount(Number(e.target.value))}/></div>
-      <label className="field-label">NAMA LENGKAP</label><input className="form-input" placeholder="Nama kamu" value={name} onChange={e=>setName(e.target.value)}/>
-      {notice&&<div className="notice">{notice}</div>}
-      <button className="button-primary full" disabled={amount<10000} onClick={donate}>{`Tampilkan QRIS ${rupiah(amount)}`} <ArrowUpRight size={17}/></button>
-      <div className="secure-note"><ShieldCheck size={15}/> QRIS statis. Pastikan nama merchant dan nominal benar sebelum membayar.</div>
-      </>}
-    </div></div>}
+    <footer className="site-footer"><div className="wrap footer-inner"><a className="logo footer-logo" href="#home"><span className="logo-symbol"><Flame size={22} fill="currentColor"/></span><span className="logo-words">NYALA<span>BERSAMA</span><small>BERBAGI HARI INI, MENJAGA ESOK</small></span></a><p>Gerakan kepedulian untuk warga terdampak karhutla dan pemulihan lingkungan.</p><span className="copyright">© 2026 NYALA BERSAMA</span></div></footer>
+
+    {modal && <div className="modal-overlay" onClick={() => setModal(false)}><section className="donation-modal" role="dialog" aria-modal="true" aria-labelledby="donation-title" onClick={e => e.stopPropagation()}><button className="modal-x" aria-label="Tutup" onClick={() => setModal(false)}><X/></button>
+      {!showQr ? <><div className="section-kicker">DONASI KARHUTLA</div><h2 id="donation-title">Setiap bantuan berarti.</h2><p className="modal-description">Isi nama dan pilih nominal. Setelah itu QRIS akan ditampilkan untuk dipindai.</p><label className="input-label" htmlFor="donor-name">NAMA DONATUR</label><input id="donor-name" className="donor-input" value={donor} onChange={e => setDonor(e.target.value)} placeholder="Nama kamu"/><span className="input-label">PILIH NOMINAL</span><div className="amount-grid">{[25000,50000,100000,200000].map(v => <button type="button" className={!custom && amount===v ? "amount-active" : ""} key={v} onClick={() => {setAmount(v);setCustom("");}}>{money(v)}</button>)}</div><label className="input-label" htmlFor="custom-amount">ATAU NOMINAL LAIN</label><input id="custom-amount" className="donor-input" inputMode="numeric" value={custom} onChange={e => setCustom(e.target.value.replace(/\D/g,""))} placeholder="Contoh: 75000"/>{error && <p className="form-error">{error}</p>}<button className="primary-button modal-submit" onClick={continueToQr}>Lanjut ke QRIS <ArrowRight size={17}/></button></> : <><div className="section-kicker">LANGKAH TERAKHIR</div><h2 id="donation-title">Terima kasih, {donor}.</h2><p className="modal-description">Nominal pilihanmu: <b>{money(amount)}</b>. Pindai QRIS ini dari aplikasi pembayaranmu. Jika aplikasi meminta nominal, masukkan sesuai pilihan.</p><img className="modal-qr" src="/qris-donasi.jpg" alt="QRIS donasi"/><p className="merchant-alert">Pastikan nama merchant yang muncul di aplikasi memang sesuai dengan pengelola donasi sebelum menyelesaikan pembayaran.</p><p className="manual-note">QRIS ini bersifat statis. Website tidak menerima notifikasi pembayaran otomatis. Simpan bukti transaksi dan hubungi pengelola untuk verifikasi manual.</p><button className="primary-button modal-submit" onClick={() => setModal(false)}>Selesai <Check size={17}/></button></>}
+    </section></div>}
   </main>;
 }
