@@ -1,30 +1,28 @@
-# Nyala Bersama — website donasi QRIS statis
+# NYALA BERSAMA
 
-Website Next.js untuk menampilkan program bantuan dan menerima donasi melalui gambar QRIS statis yang diberikan pengelola.
+Website donasi berbasis Next.js dengan QRIS statis. Proyek ini **tidak menggunakan Midtrans atau Supabase**.
 
-## Pembayaran QRIS statis
-- Gambar QRIS tersimpan di `public/qris-donasi.jpg`.
-- Donatur memilih program dan nominal, mengisi nama, lalu website menampilkan QRIS.
-- QRIS ini terbaca sebagai merchant **FEL STORE**, Kabupaten Deli Serdang. Pastikan identitas merchant tersebut memang benar dan mendapat izin dari pemilik QRIS sebelum website dipublikasikan.
-- QRIS statis tidak memuat nominal transaksi dan tidak mengirim webhook/notifikasi ke website. Donatur perlu memasukkan nominal secara manual jika diminta, menyimpan bukti pembayaran, lalu mengirimkannya ke pengelola.
-- Website tidak mengklaim pembayaran berhasil secara otomatis. Pengelola harus mencocokkan mutasi/saldo dan bukti pembayaran secara manual.
+## Menjalankan lokal
 
-## Jalankan lokal
-1. Install Node.js 20+.
-2. `npm install`
-3. `npm run dev`
+```bash
+npm install
+npm run dev
+```
 
 ## Deploy ke Vercel
-1. Upload seluruh isi folder project ini ke repository GitHub.
-2. Import repository di Vercel sebagai project Next.js.
-3. Deploy. Untuk alur QRIS statis di halaman ini, tidak diperlukan kredensial Midtrans.
 
-## Sebelum menerima donasi sungguhan
-- Pastikan pemilik QRIS mengizinkan penggunaannya untuk penggalangan dana ini. Jangan gunakan QRIS milik toko/pihak lain tanpa izin.
-- Pastikan nama merchant yang tampil di aplikasi pembayar cocok dengan informasi yang diumumkan kepada donatur.
-- Lengkapi identitas pengelola, kontak, kebijakan privasi, tujuan penggunaan dana, target, biaya, dan laporan penyaluran.
-- Angka progres kampanye di halaman awal masih data contoh; jangan tampilkan sebagai jumlah donasi nyata.
-- Buat proses pencatatan manual yang aman dan jangan mengumumkan donasi berhasil sebelum pembayaran benar-benar diperiksa.
+1. Upload seluruh isi folder proyek ke root repository GitHub (pastikan `package.json` berada di root).
+2. Import repository tersebut ke Vercel.
+3. Framework preset: Next.js. Build command: `npm run build`.
+4. Tidak perlu environment variable untuk pembayaran/database.
 
-## Catatan teknis
-Website ini saat ini hanya menampilkan QRIS statis. Konfirmasi otomatis, tanda terima email, dan rekap donasi aktual belum diaktifkan.
+## Cara donasi
+
+Donatur memilih program dan nominal, lalu website menampilkan QRIS statis dari `public/qris-donasi.jpg`. Untuk QRIS statis, donatur perlu memasukkan nominal secara manual jika aplikasi memintanya. Pengelola harus memeriksa mutasi/bukti transaksi secara manual. Website tidak dapat mendeteksi pembayaran atau mengubah status menjadi berhasil secara otomatis hanya dari gambar QRIS.
+
+## Sebelum dipublikasikan
+
+- Pastikan QRIS memang milik organisasi/pengelola yang berwenang dan nama merchant yang muncul sesuai.
+- Ganti angka terkumpul yang masih berupa data contoh di `components/HomeClient.tsx`.
+- Lengkapi identitas pengelola, kontak, kebijakan privasi, serta laporan penggunaan dana.
+- Tambahkan cara resmi bagi donatur untuk mengirim bukti pembayaran dan untuk pengelola melakukan verifikasi.
