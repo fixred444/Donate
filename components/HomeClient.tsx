@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Script from "next/script";
+import { useState } from "react";
 import { ArrowUpRight, Check, ChevronDown, Heart, Instagram, Menu, ShieldCheck, Sprout, Users, X } from "lucide-react";
 
 const campaigns = [
@@ -13,23 +12,10 @@ const rupiah = (n:number) => new Intl.NumberFormat("id-ID",{style:"currency",cur
 
 export default function HomeClient(){
   const [modal,setModal]=useState(false), [selected,setSelected]=useState("karhutla"), [amount,setAmount]=useState(50000);
-  const [name,setName]=useState(""), [email,setEmail]=useState(""), [busy,setBusy]=useState(false), [notice,setNotice]=useState("");
+  const [name,setName]=useState(""), [notice,setNotice]=useState("");
   const [mobile,setMobile]=useState(false);
-  const [donationId,setDonationId]=useState("");
-  const [paymentStatus,setPaymentStatus]=useState("");
   const [showQr,setShowQr]=useState(false);
-  const active=campaigns.find(c=>c.id===selected)!;
 
-  useEffect(()=>{
-    const params=new URLSearchParams(window.location.search);
-    const id=params.get("donation");
-    if(id){setDonationId(id);setModal(true);setNotice("Kami sedang memastikan status donasimu.");}
-  },[]);
-  useEffect(()=>{
-    if(!donationId)return;
-    const check=async()=>{try{const r=await fetch(`/api/donations/${donationId}`);const d=await r.json();if(d.status==="paid"){setPaymentStatus("paid");setNotice("Donasi berhasil diterima. Terima kasih sudah ikut menyalakan harapan.");}else if(d.status==="failed"||d.status==="expired"){setPaymentStatus(d.status);setNotice("Pembayaran belum berhasil. Kamu bisa mencoba donasi kembali.");}}catch{}};
-    check(); const t=setInterval(check,5000); return()=>clearInterval(t);
-  },[donationId]);
 
   async function donate(){
     if(!name.trim()){setNotice("Isi nama lengkap agar donasimu dapat dicatat.");return;}
@@ -79,27 +65,24 @@ export default function HomeClient(){
 
     <section className="story-section" id="cerita"><div className="wrap story-layout"><div className="story-image"><img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1000&q=85" alt="Relawan membantu masyarakat"/><div className="story-label">KEBAIKAN SELALU MENEMUKAN JALAN.</div></div><div className="story-copy"><div className="eyebrow">LEBIH DARI SEKADAR ANGKA</div><h2>Ketika kita bergerak bersama, beban terasa lebih ringan.</h2><p>Bencana mengubah banyak hal dalam sekejap. Tapi kepedulian mengingatkan kita bahwa tidak ada yang harus melewati masa sulit sendirian.</p><p>Nyala Bersama menghubungkan niat baik dengan kebutuhan nyata di lapangan—dengan informasi yang jelas dan proses yang bisa dipantau.</p><a href="#cara" className="text-link">Kenali cara kami bekerja <span>↗</span></a></div></div></section>
 
-    <section className="section wrap steps" id="cara"><div className="eyebrow">MUDAH, AMAN, DAN TERBUKA</div><h2>Kebaikanmu sampai dengan jelas.</h2><div className="steps-grid"><div><b>01</b><Heart/><h3>Pilih kepedulianmu</h3><p>Tentukan program dan nominal donasi yang ingin kamu berikan.</p></div><div><b>02</b><ShieldCheck/><h3>Bayar dengan QRIS</h3><p>Selesaikan pembayaran melalui halaman aman dari penyedia pembayaran.</p></div><div><b>03</b><Check/><h3>Pantau konfirmasi</h3><p>Status diperbarui setelah pembayaran terverifikasi oleh sistem.</p></div></div></section>
+    <section className="section wrap steps" id="cara"><div className="eyebrow">MUDAH, AMAN, DAN TERBUKA</div><h2>Kebaikanmu sampai dengan jelas.</h2><div className="steps-grid"><div><b>01</b><Heart/><h3>Pilih kepedulianmu</h3><p>Tentukan program dan nominal donasi yang ingin kamu berikan.</p></div><div><b>02</b><ShieldCheck/><h3>Bayar dengan QRIS</h3><p>Pindai QRIS menggunakan DANA atau aplikasi pembayaran lain yang mendukung QRIS.</p></div><div><b>03</b><Check/><h3>Kirim bukti pembayaran</h3><p>Simpan bukti transaksi dan kirimkan kepada pengelola untuk verifikasi manual.</p></div></div></section>
 
     <section className="closing"><div className="wrap closing-inner"><div><div className="eyebrow">SEKECIL APA PUN, TETAP BERARTI</div><h2>Mari nyalakan harapan,<br/><em>satu aksi hari ini.</em></h2></div><button className="button-light" onClick={()=>{setModal(true);setNotice("");}}>Saya mau membantu <ArrowUpRight size={18}/></button></div></section>
     <footer className="footer wrap" id="transparansi"><a className="brand" href="#"><span className="brand-mark"><Sprout size={20}/></span><span>nyala<span className="brand-light">bersama</span><small>KEBAIKAN YANG MENULAR</small></span></a><p>Ruang untuk kepedulian, aksi, dan harapan.</p><div><a href="#aksi">Program</a><a href="#cara">Cara kerja</a><a href="mailto:halo@nyalabersama.id">Kontak</a><span>© 2026 Nyala Bersama</span></div></footer>
 
-    {modal&&<div className="modal-backdrop" onClick={()=>{if(!busy)setModal(false);}}><div className="donation-modal" onClick={e=>e.stopPropagation()}>
+    {modal&&<div className="modal-backdrop" onClick={()=>setModal(false)}><div className="donation-modal" onClick={e=>e.stopPropagation()}>
       <button className="modal-close" onClick={()=>setModal(false)} aria-label="Tutup"><X/></button>
       <div className="modal-eyebrow">SATU KEBAIKAN, BANYAK HARAPAN</div>
-      {showQr?<div className="success-state"><h2>Scan QRIS untuk berdonasi</h2><p>Masukkan nominal <strong>{rupiah(amount)}</strong> di aplikasi pembayaranmu jika diminta. QR ini terbaca atas nama merchant <strong>FEL STORE</strong> (Kab. Deli Serdang). Lanjutkan hanya jika nama tersebut memang milik pengelola donasi dan kamu mengenalinya.</p><img src="/qris-donasi.jpg" alt="QRIS donasi Nyala Bersama" style={{display:"block",width:"min(100%,320px)",height:"auto",margin:"18px auto",border:"1px solid #e5e1d8",borderRadius:12}}/><p style={{fontSize:13}}>Setelah membayar, simpan bukti transaksi dan kirimkan kepada pengelola untuk pencatatan. QRIS statis tidak mengirim notifikasi transaksi ke website, jadi status donasi tidak bisa berubah otomatis.</p><button className="button-primary full" onClick={()=>{setShowQr(false);setModal(false);}}>Selesai</button></div>:paymentStatus==="paid"?<div className="success-state"><div className="success-icon"><Check size={30}/></div><h2>Terima kasih sudah hadir. ❤️</h2><p>Donasimu sudah kami terima dan terverifikasi. Kebaikanmu berarti bagi mereka yang sedang berjuang.</p><button className="button-primary full" onClick={()=>{setModal(false);setDonationId("");setPaymentStatus("");}}>Kembali ke halaman</button></div>:<>
+      {showQr?<div className="success-state"><h2>Scan QRIS untuk berdonasi</h2><p>Masukkan nominal <strong>{rupiah(amount)}</strong> di aplikasi pembayaranmu jika diminta. QR ini terbaca atas nama merchant <strong>FEL STORE</strong> (Kab. Deli Serdang). Lanjutkan hanya jika nama tersebut memang milik pengelola donasi dan kamu mengenalinya.</p><img src="/qris-donasi.jpg" alt="QRIS donasi Nyala Bersama" style={{display:"block",width:"min(100%,320px)",height:"auto",margin:"18px auto",border:"1px solid #e5e1d8",borderRadius:12}}/><p style={{fontSize:13}}>Setelah membayar, simpan bukti transaksi dan kirimkan kepada pengelola untuk pencatatan. QRIS statis tidak mengirim notifikasi transaksi ke website, jadi status donasi tidak bisa berubah otomatis.</p><button className="button-primary full" onClick={()=>{setShowQr(false);setModal(false);}}>Selesai</button></div>:<>
       <h2>Yuk, jadi bagian dari harapan.</h2><p className="modal-sub">Pilih program dan nominal yang ingin kamu salurkan.</p>
       <label className="field-label">PROGRAM BANTUAN</label><select value={selected} onChange={e=>setSelected(e.target.value)}>{campaigns.map(c=><option value={c.id} key={c.id}>{c.title}</option>)}</select>
       <label className="field-label">NOMINAL DONASI</label><div className="amount-options">{[25000,50000,100000,250000].map(n=><button className={amount===n?"chosen":""} onClick={()=>setAmount(n)} key={n}>{rupiah(n)}</button>)}</div>
       <div className="custom-amount"><span>Rp</span><input type="number" min="10000" step="1000" value={amount} onChange={e=>setAmount(Number(e.target.value))}/></div>
       <label className="field-label">NAMA LENGKAP</label><input className="form-input" placeholder="Nama kamu" value={name} onChange={e=>setName(e.target.value)}/>
-      <label className="field-label">EMAIL</label><input className="form-input" type="email" placeholder="kamu@email.com" value={email} onChange={e=>setEmail(e.target.value)}/>
       {notice&&<div className="notice">{notice}</div>}
-      <button className="button-primary full" disabled={busy||amount<10000} onClick={donate}>{busy?"Menyiapkan…":`Tampilkan QRIS ${rupiah(amount)}`} <ArrowUpRight size={17}/></button>
+      <button className="button-primary full" disabled={amount<10000} onClick={donate}>{`Tampilkan QRIS ${rupiah(amount)}`} <ArrowUpRight size={17}/></button>
       <div className="secure-note"><ShieldCheck size={15}/> QRIS statis. Pastikan nama merchant dan nominal benar sebelum membayar.</div>
       </>}
     </div></div>}
-    <script/>
-    {process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY && <Script src={`${process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === "true" ? "https://app.midtrans.com" : "https://app.sandbox.midtrans.com"}/snap/snap.js`} data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY} strategy="afterInteractive" />}
   </main>;
 }
