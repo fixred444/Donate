@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Nyala Bersama — Pulihkan Harapan",
-  description: "Gerakan gotong royong untuk membantu warga terdampak bencana di Indonesia.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  title: "ZeroTask — Dashboard Setor Tugas",
+  description: "Platform pengelolaan tugas dan verifikasi hasil pekerjaan."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
