@@ -1,28 +1,36 @@
-# NYALA BERSAMA
+# ZeroTask — Prototype UI
 
-Website donasi berbasis Next.js dengan QRIS statis. Proyek ini **tidak menggunakan Midtrans atau Supabase**.
+Prototype website for a general digital-task platform (for example: surveys, app testing, data review, and other legitimate tasks). The visual layout follows the supplied mobile screenshots.
 
-## Menjalankan lokal
+## Included in this prototype
+- Login and registration screen UI.
+- User dashboard, task list, submission history, wallet, and profile.
+- Admin preview to create tasks, set year/instructions/reward rate, and review submissions.
+- Submission statuses: Pending, Diproses, Success, Ditolak.
+- Reward is added to the in-memory demo balance only when approved.
+- No sample tasks are preloaded; the admin preview must create them.
 
+## Run locally
 ```bash
 npm install
 npm run dev
 ```
 
-## Deploy ke Vercel
+## Deploy to GitHub + Vercel
+1. Upload the project to a GitHub repository.
+2. Import that repository in Vercel.
+3. Framework: Next.js. Build command: `npm run build`.
 
-1. Upload seluruh isi folder proyek ke root repository GitHub (pastikan `package.json` berada di root).
-2. Import repository tersebut ke Vercel.
-3. Framework preset: Next.js. Build command: `npm run build`.
-4. Tidak perlu environment variable untuk pembayaran/database.
+## Important before production
+This is a **frontend prototype**, not a live multi-user service. Login/register currently runs only in browser state; Google login, password reset, persistent database, secure admin authorization, task ownership, submissions, and wallet ledger are not connected.
 
-## Cara donasi
+For production, connect Supabase:
+- Supabase Auth for email/password and Google OAuth.
+- `profiles` table with a server-controlled `role` (`user` or `admin`).
+- `tasks` table for admin-created tasks.
+- `submissions` table for user work and review status.
+- `wallet_transactions` ledger; credit only from a server-side approval function / database transaction.
+- Row Level Security (RLS) so users can only see their own submissions and balance, while admins can manage tasks and review all submissions.
+- Never let a user choose their own admin role or trust a role stored only in localStorage/browser code.
 
-Donatur memilih program dan nominal, lalu website menampilkan QRIS statis dari `public/qris-donasi.jpg`. Untuk QRIS statis, donatur perlu memasukkan nominal secara manual jika aplikasi memintanya. Pengelola harus memeriksa mutasi/bukti transaksi secara manual. Website tidak dapat mendeteksi pembayaran atau mengubah status menjadi berhasil secara otomatis hanya dari gambar QRIS.
-
-## Sebelum dipublikasikan
-
-- Pastikan QRIS memang milik organisasi/pengelola yang berwenang dan nama merchant yang muncul sesuai.
-- Ganti angka terkumpul yang masih berupa data contoh di `components/HomeClient.tsx`.
-- Lengkapi identitas pengelola, kontak, kebijakan privasi, serta laporan penggunaan dana.
-- Tambahkan cara resmi bagi donatur untuk mengirim bukti pembayaran dan untuk pengelola melakukan verifikasi.
+This platform is intended for legitimate digital tasks. Do not use it to buy/sell accounts, collect passwords, OTPs, recovery codes, or other account credentials.
